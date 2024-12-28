@@ -1,65 +1,44 @@
-const config = {
-    type: Phaser.AUTO,
-    width: 800,
-    height: 600,
-    backgroundColor: '#f3f3f3',
-    physics: {
-        default: 'arcade',
-        arcade: {
-            gravity: { y: 0 },
-            debug: false
-        }
-    },
-    scene: {
-        preload: preload,
-        create: create,
-        update: update
-    }
+const canvas = document.getElementById("gameCanvas");
+const context = canvas.getContext("2d");
+
+canvas.width = 800;
+canvas.height = 400;
+
+// Player object
+const player = {
+  x: 50,
+  y: 300,
+  width: 50,
+  height: 50,
+  color: "blue",
+  speed: 5,
 };
 
-const game = new Phaser.Game(config);
-let player, cursors, socket;
+// Enemy object
+const enemy = {
+  x: 700,
+  y: 300,
+  width: 50,
+  height: 50,
+  color: "red",
+  speed: 5,
+};
 
-function preload() {
-    this.load.image('background', 'background.jpg'); // Background image
-    this.load.spritesheet('characters', 'characters.png', {
-        frameWidth: 64,
-        frameHeight: 64
-    }); // Characters spritesheet
+// Draw objects
+function drawObject(obj) {
+  context.fillStyle = obj.color;
+  context.fillRect(obj.x, obj.y, obj.width, obj.height);
 }
 
-function create() {
-    this.add.image(400, 300, 'background');
-    
-    player = this.physics.add.sprite(400, 300, 'characters', 0);
-    player.setCollideWorldBounds(true);
+// Game loop
+function gameLoop() {
+  context.clearRect(0, 0, canvas.width, canvas.height);
 
-    cursors = this.input.keyboard.createCursorKeys();
+  drawObject(player);
+  drawObject(enemy);
 
-    this.add.text(10, 10, 'Touch controls to move', { font: '16px Arial', fill: '#000' });
-
-    socket = io('http://localhost:3000');
-    socket.emit('newPlayer');
-
-    socket.on('updatePlayers', (players) => {
-        console.log(players);
-    });
+  requestAnimationFrame(gameLoop);
 }
 
-function update() {
-    if (cursors.left.isDown) {
-        player.setVelocityX(-200);
-    } else if (cursors.right.isDown) {
-        player.setVelocityX(200);
-    } else {
-        player.setVelocityX(0);
-    }
-
-    if (cursors.up.isDown) {
-        player.setVelocityY(-200);
-    } else if (cursors.down.isDown) {
-        player.setVelocityY(200);
-    } else {
-        player.setVelocityY(0);
-    }
-}
+// Start game loop
+gameLoop();
